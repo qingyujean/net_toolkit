@@ -210,7 +210,7 @@ public class MainTest
  	}
  	
  	/*
-	 * 节点12.HTTP有无应答返回
+	 * HTTP有无应答返回
 	 * @param url string
 	 * @return true HTTP有应答
 	 * 		   false HTTP无应答
@@ -230,8 +230,6 @@ public class MainTest
 	            httpcon.connect();
 	            statusCode = httpcon.getResponseCode();
 	            reasonPhrase = httpcon.getResponseMessage();
-	            //System.out.println(statusCode);
-	            //System.out.println(reasonPhrase);
 			}  catch (SocketException e){
 				log.info("Recv failure: Connection was aborted");
 				e.printStackTrace();
@@ -250,9 +248,6 @@ public class MainTest
 			
 		} else {
 		
-			
-			
-			
 			
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			// 测试：一个返回404的页面：www.zhihu.com/question/abcde
