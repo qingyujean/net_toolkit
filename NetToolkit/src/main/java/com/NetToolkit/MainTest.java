@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,16 @@ import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
+import com.NetToolkit.ipip.datx.City;
+import com.NetToolkit.ipip.datx.IPv4FormatException;
 import com.NetToolkit.netutils.Toolkit;
 import com.NetToolkit.netutils.ssl.SslUtil;
 
@@ -192,7 +197,27 @@ public class MainTest
 			//下载信息没错
 			log.info("网站访问正常");
 		}
-		*/
+		
+        
+        //测试15：获取IP的定位信息（可定位境内外IP）；前提：执行测试5
+        String datx_path = System.getProperty("user.dir")+"/17mon/";
+        try {
+	        //含运营商信息
+	        City city = new City(datx_path+"mydata4vipweek2.datx"); // 城市库
+			//不含运营商信息
+			//City city = new City(datx_path+"17monipdb1/17monipdb.datx");			 	
+			System.out.println(Arrays.toString(city.find(ipsOfdomainName.get(0))));
+        } catch (IOException ioex) {
+	        ioex.printStackTrace();
+	    } catch (IPv4FormatException ipex) {
+	        ipex.printStackTrace();
+	    }
+	    
+        
+        //测试16：获取IP的定位信息的其他接口（只能定位国内IP）；前提：执行测试5
+        String ipLoate = getIpLocation2(ipsOfdomainName.get(0));
+        System.out.println(ipLoate);
+        */
     }
     
     //SSL握手是否成功
@@ -291,12 +316,65 @@ public class MainTest
 				}
 			}
 			
-			
-			
-			
 		}
 		System.out.println("http response:"+statusCode+", "+reasonPhrase);
 		return status;
 	}
 	
+	
+	
+
+    //百度地图接口
+    public static String getIpLocation2(String ip){
+        String url = "http://api.map.baidu.com/location/ip?ip="+ip+"&ak=OrrREGhqUN4ShFcIHiIZZT6F&coor=bd09ll";
+        //System.out.println(url);
+        String resp = sendGet(url);
+        //System.out.println("resp="+resp);
+        if(resp=="")
+            return "";
+
+        JSONObject respObj = JSONObject.fromObject(((JSONObject)JSONObject.fromObject(resp).get("content")).get("address_detail"));
+
+        return respObj.get("province")+"-"+respObj.get("city");
+    }
+	
+  //不带参数的get请求
+    public static String sendGet(String get_url){
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        //System.out.println("测试get_url："+get_url);
+        HttpGet httpget = new HttpGet(get_url);//模拟浏览器访问
+        httpget.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
+
+        CloseableHttpResponse response = null;
+        String response_contents = "";
+        try {
+            response = httpclient.execute(httpget);
+            HttpEntity entity = response.getEntity();
+            //System.out.println(response.getStatusLine());  //响应状态
+            if (entity != null) {
+                //System.out.println("--------------------------------------");
+                // 打印响应内容长度
+                //System.out.println("Response content length: " + entity.getContentLength());
+                // 打印响应内容
+                response_contents = EntityUtils.toString(entity);
+                //System.out.println("Response content: " + response_contents);
+                //System.out.println("--------------------------------------");
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            System.out.println("超时！");
+            return response_contents;
+        }finally{
+            try {
+                response.close();
+                httpclient.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return response_contents;
+            }
+        }
+        return response_contents;
+    }
 }
