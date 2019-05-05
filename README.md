@@ -1,0 +1,2 @@
+# net_toolkit
+Java封装的网络测试工具集，集成了nslookup、ping、curl、traceroot等多个小工具，可用于追溯访问一个URL的整个网络过程，访问网站URL使用扩展WebDriver Selenium以及基于W3C标准的Resource Timing API和Navigation Timing API
